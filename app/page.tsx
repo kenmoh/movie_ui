@@ -1,54 +1,63 @@
-import NextLink from "next/link";
-import { Link } from "@nextui-org/link";
-import { Snippet } from "@nextui-org/snippet";
-import { Code } from "@nextui-org/code"
-import { button as buttonStyles } from "@nextui-org/theme";
-import { siteConfig } from "@/config/site";
-import { title, subtitle } from "@/components/primitives";
-import { GithubIcon } from "@/components/icons";
 
-export default function Home() {
-	return (
-		<section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-			<div className="inline-block max-w-lg text-center justify-center">
-				<h1 className={title()}>Make&nbsp;</h1>
-				<h1 className={title({ color: "violet" })}>beautiful&nbsp;</h1>
-				<br />
-				<h1 className={title()}>
-					websites regardless of your design experience.
-				</h1>
-				<h2 className={subtitle({ class: "mt-4" })}>
-					Beautiful, fast and modern React UI library.
-				</h2>
-			</div>
+import Link from "next/link";
+import { title } from "@/components/primitives";
+import MovieCard from "@/components/MovieCard";
+import { getMovies } from "./utils/api";
 
-			<div className="flex gap-3">
-				<Link
-					isExternal
-					as={NextLink}
-					href={siteConfig.links.docs}
-					className={buttonStyles({ color: "primary", radius: "full", variant: "shadow" })}
-				>
-					Documentation
-				</Link>
-				<Link
-					isExternal
-					as={NextLink}
-					className={buttonStyles({ variant: "bordered", radius: "full" })}
-					href={siteConfig.links.github}
-				>
-					<GithubIcon size={20} />
-					GitHub
-				</Link>
-			</div>
+type MoviesData = {
+  title: string
+  cover_image_url: string,
+  description: string,
+  length: number,
+  genre: string,
+  casts: string,
+  id: number,
+  thriller: string,
+  average_rating: number,
 
-			<div className="mt-8">
-				<Snippet hideSymbol hideCopyButton variant="flat">
-					<span>
-						Get started by editing <Code color="primary">app/page.tsx</Code>
-					</span>
-				</Snippet>
-			</div>
-		</section>
-	);
 }
+
+
+const Home = async () => {
+
+  const data: [] = await getMovies('movie')
+
+  return (
+    <>
+      <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
+        <div className="inline-block max-w-lg text-center justify-center">
+          <h1 className={title()}>Review&nbsp; Your Favourite&nbsp; </h1>
+          <h1 className={title({ color: "violet" })}> Movies, Books, Music</h1>
+          <br />
+        </div>
+      </section>
+      {data ? <section>
+        <div className="flex justify-between items-center ">
+          <h3 className={`${title()}`}>Highest Rated</h3>
+        </div>
+
+        <div className="grid sm:grid-cols-2 md:grid-cols-5 gap-4 mt-5">
+          {data?.map((movie: MoviesData) => (
+            movie.average_rating >= 3.5 && <div key={movie.id}>
+              <Link
+                href={`/movies/${movie.id}`}
+              >
+                <MovieCard
+                  imageUrl={movie.cover_image_url}
+                  rating={movie?.average_rating !== 0 ? movie?.average_rating.toFixed(1) : ''}
+                  title={movie.title}
+                />
+              </Link>
+            </div>
+          )
+
+          )}
+        </div>
+      </section> : <h1>No Movies</h1>}
+
+
+    </>
+  );
+}
+
+export default Home;
